@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   actionSketch,
+  filterByRoom,
   NULL_ACTION,
   note,
   parseRoomNote,
   remainingBytes,
+  SAMPLE_FEED,
 } from "./note";
 
 describe("null-action note", () => {
@@ -27,6 +29,12 @@ describe("null-action note", () => {
 
   it("remainingBytes", () => {
     expect(remainingBytes("gm")).toBe(118);
+  });
+
+  it("filterByRoom", () => {
+    const g = filterByRoom([...SAMPLE_FEED], "general");
+    expect(g).toHaveLength(2);
+    expect(g[0].body).toBe("hello");
   });
 
   it("actionSketch does not invent data fields", () => {

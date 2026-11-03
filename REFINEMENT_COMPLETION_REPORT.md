@@ -1,13 +1,12 @@
-# Full-thrust — null-action note lab
+# Null-action note — deeper pass
 
 **Updated:** 2026-11-03
 
 | Area | Notes |
 |------|-------|
-| Engine | room parse, remaining, actionSketch |
-| Tests | multiline, size, room |
-| Docs | ABI honesty, WharfKit |
-| UI | samples + sketch JSON |
+| Engine | filterByRoom |
+| UI | share, export, sample feed |
+| Tests | filter + share |
 
 ```bash
 npm test && npm run dev

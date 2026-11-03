@@ -1,22 +1,74 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Cases } from "./Cases";
+import { downloadText, exportNoteMarkdown } from "./exportReport";
 import {
   actionSketch,
+  filterByRoom,
   note,
   parseRoomNote,
   remainingBytes,
+  SAMPLE_FEED,
   SAMPLE_NOTES,
 } from "./note";
 import { GLOSSARY, NOTE_MYTHS } from "./myths";
+import { decodeShareState, encodeShareState } from "./shareState";
+
+const LS_KEY = "pxj-null-note-v1";
 
 export function Demo() {
   const [text, setText] = useState("gm");
+  const [roomFilter, setRoomFilter] = useState("general");
+  const [shareMsg, setShareMsg] = useState("");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const fromUrl = decodeShareState(window.location.search);
+    if (fromUrl.text) {
+      setText(fromUrl.text);
+      return;
+    }
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return;
+      const p = JSON.parse(raw) as { text?: string };
+      if (p.text) setText(p.text);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify({ text }));
+    } catch {
+      /* ignore */
+    }
+  }, [text]);
 
   const result = useMemo(() => note(text), [text]);
   const room = useMemo(() => parseRoomNote(text), [text]);
   const left = remainingBytes(text);
   const sketch = actionSketch();
+  const feed = useMemo(
+    () => filterByRoom([...SAMPLE_FEED], roomFilter.trim() || null),
+    [roomFilter]
+  );
+
+  const copyShare = async () => {
+    const qs = encodeShareState({ text });
+    const path =
+      typeof window !== "undefined"
+        ? `${window.location.origin}${window.location.pathname}?${qs}`
+        : `?${qs}`;
+    try {
+      await navigator.clipboard.writeText(path);
+      setShareMsg("Share URL copied");
+    } catch {
+      setShareMsg(path);
+    }
+  };
 
   return (
     <main className="wrap">
@@ -66,10 +118,37 @@ export function Demo() {
       </label>
 
       {result.ok ? (
-        <p>
-          ok · <strong>{result.bytes}</strong> bytes · remaining capacity{" "}
-          <strong>{left}</strong>
-        </p>
+        <>
+          <p>
+            ok · <strong>{result.bytes}</strong> bytes · remaining capacity{" "}
+            <strong>{left}</strong>
+          </p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+            <button
+              type="button"
+              onClick={() =>
+                downloadText(
+                  "null-note.md",
+                  exportNoteMarkdown({
+                    text: result.text,
+                    ok: "true",
+                    bytes: String(result.bytes),
+                    room: room.ok && room.room ? room.room : undefined,
+                    body: room.ok ? room.body : undefined,
+                  })
+                )
+              }
+            >
+              Download MD
+            </button>
+            <button type="button" onClick={() => void copyShare()}>
+              Copy share URL
+            </button>
+          </div>
+          {shareMsg && (
+            <p style={{ fontSize: "0.85rem", opacity: 0.8 }}>{shareMsg}</p>
+          )}
+        </>
       ) : (
         <p>{result.reason}</p>
       )}
@@ -81,11 +160,33 @@ export function Demo() {
       )}
 
       <section style={{ marginTop: "1.5rem" }}>
+        <h2 style={{ fontSize: "1rem" }}>Sample feed filter (client convention)</h2>
+        <label style={{ display: "block", marginBottom: "0.5rem" }}>
+          Room filter
+          <input
+            value={roomFilter}
+            onChange={(e) => setRoomFilter(e.target.value)}
+            style={{ display: "block", width: "100%", marginTop: "0.25rem" }}
+          />
+        </label>
+        <ul style={{ fontSize: "0.9rem" }}>
+          {feed.map((f) => (
+            <li key={f.text}>
+              {f.room ? `#${f.room} ` : ""}
+              {f.body}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section style={{ marginTop: "1.5rem" }}>
         <h2 style={{ fontSize: "1rem" }}>Action sketch (not signed)</h2>
         <pre style={{ fontSize: "0.85rem", whiteSpace: "pre-wrap" }}>
           {JSON.stringify(sketch, null, 2)}
         </pre>
       </section>
+
+      <Cases />
 
       <section style={{ marginTop: "1.5rem" }}>
         <h2 style={{ fontSize: "1rem" }}>Runbook</h2>
@@ -112,7 +213,7 @@ export function Demo() {
       </section>
 
       <p style={{ marginTop: "2rem", fontSize: "0.85rem", opacity: 0.75 }}>
-        See EDUCATION.md · POLICY.md · SECURITY.md · companion: wax-p2p-null-action-chat-feed
+        URL overrides localStorage when present. See EDUCATION.md · SECURITY.md
       </p>
     </main>
   );

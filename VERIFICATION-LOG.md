@@ -5,6 +5,7 @@
 | Claim | Status |
 | --- | --- |
 | note validation | unit |
-| parseRoomNote / remainingBytes | unit |
+| parseRoomNote / filterByRoom | unit |
 | actionSketch no invented fields | unit |
+| shareState | unit |
 | Broadcast | out of scope |

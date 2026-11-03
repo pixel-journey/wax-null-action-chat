@@ -23,7 +23,6 @@ export function note(input: string): Note {
   return { ok: true, text, bytes };
 }
 
-/** Optional room prefix pattern: "#room message" → { room, body }. */
 export function parseRoomNote(
   input: string
 ): { ok: false; reason: string } | { ok: true; room: string | null; body: string; note: NoteOk } {
@@ -39,12 +38,24 @@ export function remainingBytes(input: string): number {
   return Math.max(0, MAX_NOTE_BYTES - bytes);
 }
 
+/** Filter educational feed items by optional room (client convention). */
+export function filterByRoom(
+  items: readonly string[],
+  room: string | null
+): { ok: true; text: string; room: string | null; body: string }[] {
+  const out: { ok: true; text: string; room: string | null; body: string }[] = [];
+  for (const item of items) {
+    const p = parseRoomNote(item);
+    if (!p.ok) continue;
+    if (room === null || p.room === room) {
+      out.push({ ok: true, text: p.note.text, room: p.room, body: p.body });
+    }
+  }
+  return out;
+}
+
 export const NULL_ACTION = { account: "eosio.null", name: "nonce" } as const;
 
-/**
- * Educational action sketch only — no data field invented.
- * Hosts must confirm live ABI before building a real transaction.
- */
 export function actionSketch(): {
   account: string;
   name: string;
@@ -64,4 +75,11 @@ export const SAMPLE_NOTES = [
   { id: "gm", text: "gm" },
   { id: "room", text: "#general hello pixel journey" },
   { id: "longish", text: "a".repeat(40) },
+] as const;
+
+export const SAMPLE_FEED = [
+  "gm",
+  "#general hello",
+  "#dev ship it",
+  "#general second",
 ] as const;
