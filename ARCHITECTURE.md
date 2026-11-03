@@ -1,5 +1,14 @@
 # Architecture
 
-Validate a one-line note. Do not invent the nonce field name.
+```
+input string
+    │
+    ▼
+  note() → text + bytes
+    │
+    ├── parseRoomNote (#room body)
+    ├── remainingBytes
+    └── actionSketch (account/name only — no data invented)
+```
 
-The page calls the same functions as the tests. It does not open a socket and it does not sign.
+Honesty boundary: no network, no sign, no broadcast.

@@ -1,21 +1,30 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { NULL_ACTION, note } from "./note";
-import { NULL_NOTE_MYTHS } from "./myths";
+import {
+  actionSketch,
+  note,
+  parseRoomNote,
+  remainingBytes,
+  SAMPLE_NOTES,
+} from "./note";
+import { GLOSSARY, NOTE_MYTHS } from "./myths";
 
 export function Demo() {
-  const [input, setInput] = useState("gm");
-  const ready = useMemo(() => note(input), [input]);
+  const [text, setText] = useState("gm");
+
+  const result = useMemo(() => note(text), [text]);
+  const room = useMemo(() => parseRoomNote(text), [text]);
+  const left = remainingBytes(text);
+  const sketch = actionSketch();
 
   return (
     <main className="wrap">
       <p className="kicker">Educational reference · Pixel Journey</p>
-      <h1>A note, not a signed nonce</h1>
+      <h1>Null-action note lab</h1>
       <p className="lede">
-        {NULL_ACTION.account}::{NULL_ACTION.name} is a real action. On 2026-10-21 the
-        published ABI had no structs, so this page does not invent a JSON field. Nothing is
-        broadcast.
+        Validate a one-line note that <em>could</em> ride on eosio.null::nonce. No invented
+        ABI fields. No broadcast. Prefer WharfKit in hosts that sign.
       </p>
 
       <section
@@ -27,7 +36,7 @@ export function Demo() {
         }}
       >
         <h2 style={{ fontSize: "1rem", marginTop: 0 }}>Myths vs reality</h2>
-        {NULL_NOTE_MYTHS.map((m) => (
+        {NOTE_MYTHS.map((m) => (
           <div key={m.myth} style={{ marginBottom: "0.75rem", fontSize: "0.9rem" }}>
             <p style={{ margin: 0 }}>
               <strong>Myth:</strong> {m.myth}
@@ -39,27 +48,71 @@ export function Demo() {
         ))}
       </section>
 
-      <label style={{ display: "block", marginBottom: "1rem" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1rem" }}>
+        {SAMPLE_NOTES.map((s) => (
+          <button key={s.id} type="button" onClick={() => setText(s.text)}>
+            {s.id}
+          </button>
+        ))}
+      </div>
+
+      <label style={{ display: "block", marginBottom: "0.75rem" }}>
         Note (one line)
         <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          style={{ display: "block", width: "100%", marginTop: "0.35rem" }}
-          maxLength={200}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          style={{ display: "block", width: "100%", marginTop: "0.25rem" }}
         />
       </label>
 
-      {ready.ok ? (
+      {result.ok ? (
         <p>
-          "{ready.text}" is <strong>{ready.bytes}</strong> UTF-8 bytes — ready as text, not as
-          a signed action.
+          ok · <strong>{result.bytes}</strong> bytes · remaining capacity{" "}
+          <strong>{left}</strong>
         </p>
       ) : (
-        <p style={{ color: "#f87171" }}>{ready.reason}</p>
+        <p>{result.reason}</p>
       )}
 
+      {room.ok && room.room && (
+        <p style={{ fontSize: "0.9rem" }}>
+          room tag: <strong>#{room.room}</strong> · body: {room.body}
+        </p>
+      )}
+
+      <section style={{ marginTop: "1.5rem" }}>
+        <h2 style={{ fontSize: "1rem" }}>Action sketch (not signed)</h2>
+        <pre style={{ fontSize: "0.85rem", whiteSpace: "pre-wrap" }}>
+          {JSON.stringify(sketch, null, 2)}
+        </pre>
+      </section>
+
+      <section style={{ marginTop: "1.5rem" }}>
+        <h2 style={{ fontSize: "1rem" }}>Runbook</h2>
+        <ol style={{ fontSize: "0.9rem" }}>
+          <li>Validate note() offline.</li>
+          <li>Confirm live eosio.null ABI before any real transaction.</li>
+          <li>If signing, use WharfKit — not deprecated eosjs / Anchor Link stacks.</li>
+          <li>Never invent data field names in this educational lab.</li>
+        </ol>
+      </section>
+
+      <section style={{ marginTop: "1.5rem" }}>
+        <h2 style={{ fontSize: "1rem" }}>Glossary</h2>
+        <dl>
+          {GLOSSARY.map((g) => (
+            <div key={g.term} style={{ marginBottom: "0.5rem" }}>
+              <dt>
+                <strong>{g.term}</strong>
+              </dt>
+              <dd style={{ margin: 0 }}>{g.meaning}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
       <p style={{ marginTop: "2rem", fontSize: "0.85rem", opacity: 0.75 }}>
-        See POLICY.md. Re-check live ABI before any host app builds nonce data.
+        See EDUCATION.md · POLICY.md · SECURITY.md · companion: wax-p2p-null-action-chat-feed
       </p>
     </main>
   );

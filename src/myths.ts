@@ -1,17 +1,36 @@
-export const NULL_NOTE_MYTHS = [
+export const NOTE_MYTHS = [
   {
-    myth: "This is a full on-chain chat product",
+    myth: "This broadcasts chat to eosio.null",
     reality:
-      "It only validates a one-line note that *could* ride on eosio.null::nonce. No broadcast.",
+      "Validation only. No signing and no push_transaction in this package.",
   },
   {
-    myth: "We invent the ABI field name for nonce",
+    myth: "We know the exact ABI data field name",
     reality:
-      "Published ABI had no structs (observed 2026-10-21). Action JSON is not guessed here.",
+      "As of the 2026-10-21 check, get_abi returned no structs — do not invent fields here.",
   },
   {
-    myth: "Long multi-line messages are fine",
+    myth: "eosjs / Anchor Link is the recommended stack",
     reality:
-      "Rules: one line, ≤120 UTF-8 bytes, non-empty after trim.",
+      "Prefer WharfKit for any future intentional Antelope signing in a host app.",
+  },
+  {
+    myth: "#room tags are an on-chain standard",
+    reality: "Optional client convention for teaching feeds only.",
+  },
+] as const;
+
+export const GLOSSARY = [
+  {
+    term: "note",
+    meaning: "Trimmed one-line UTF-8 string ≤120 bytes.",
+  },
+  {
+    term: "NULL_ACTION",
+    meaning: "{ account: eosio.null, name: nonce } — no data invented.",
+  },
+  {
+    term: "parseRoomNote",
+    meaning: "Optional #room prefix convention for client feeds.",
   },
 ] as const;
