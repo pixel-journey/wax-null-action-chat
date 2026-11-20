@@ -1,7 +1,7 @@
 # A one-line note that could ride on eosio.null — without inventing the ABI
 
 > **Trust:** `educational-reference`  
-> **Catalog:** [wax-ecosystem-blueprint-catalog](https://github.com/pixel-journey/wax-ecosystem-blueprint-catalog)
+> **Catalog:** `wax-ecosystem-blueprint-catalog` (private index; not this public course)
 
 **One-sentence goal:** Teach a 120-byte one-line note validator and name the action `eosio.null::nonce`, without claiming a chat standard or a known data field.
 
