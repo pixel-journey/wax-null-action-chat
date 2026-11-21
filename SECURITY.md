@@ -4,7 +4,7 @@
 
 | Issue | Behavior |
 | --- | --- |
-| Empty / multiline / >120 UTF-8 bytes | refused |
+| Empty / multiline / > **120** UTF-8 bytes | refused |
 | Action sketch | account `eosio.null`, name `nonce` only — **no invented data fields** |
 
 ## Not closed (production)
@@ -20,8 +20,10 @@
 
 1. Inventing ABI field names for `nonce` without a live struct.  
 2. Treating `#room` as an on-chain standard.  
-3. Teaching broadcast without warning about permanence.
+3. Teaching broadcast without warning about permanence.  
+4. Embedding secrets or seeds in the note body.  
+5. Claiming the sketch proves a message was posted on-chain.
 
 ## Honesty limits
 
-No signing. No broadcast. Prefer WharfKit if a host later signs. [docs.wax.io](https://docs.wax.io/).
+No signing. No broadcast. Prefer WharfKit if a host later signs. [docs.wax.io](https://docs.wax.io/) · [WharfKit](https://wharfkit.com/).
